@@ -243,7 +243,7 @@ help_resize (help_type *help, unsigned *w, unsigned *h)
         wresize (help->window, getmaxy (help->window), *w);
       else
         help->window = newwin (1, *w, 0, 0);
-      help_render (help, 0, &rendered_width);
+      help_render (help, *w, &rendered_width);
       *w = rendered_width + help->padding.left + help->padding.right;
       did_render = TRUE;
     }

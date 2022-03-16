@@ -84,6 +84,8 @@ main ()
   help_init (&help, help_text);
 
 #if TEST_HELP_PRINT
+  unsigned w_ = 30, h_ = 10;
+  help_resize (&help, &w_, &h_);
   help_print (&help, stdout);
   help_free (&help);
   return 0;
