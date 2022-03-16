@@ -149,7 +149,7 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
                                    : getmaxx (help->window))
                                   - help->padding.left - help->padding.right);
   const unsigned width = content_width - help->key_width - 2;
-  unsigned i, current_width, token_width, j;
+  unsigned i, current_width, token_width, pad;
   char *line, *token, *out_line;
   if (help->desc_width <= width)
     {
@@ -173,9 +173,9 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
       token = strtok (line, " ");
       out_line = vector_create (char, content_width);
       /* Key and padding */
-      j = help->key_width + 2 + utf8_padding_offset (help->text[i][0]);
-      vector__size (out_line) = j;
-      sprintf (out_line, "%-*s", j, help->text[i][0]);
+      pad = help->key_width + 2 + utf8_padding_offset (help->text[i][0]);
+      vector__size (out_line) = pad;
+      sprintf (out_line, "%-*s", pad, help->text[i][0]);
       /* Description */
       current_width = 0;
       while (token)
@@ -205,9 +205,9 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
               }
               out_line = vector_create (char, content_width);
               /* Padding */
-              j = help->key_width + 2;
-              vector__size (out_line) = j;
-              memset (out_line, ' ', j);
+              pad = help->key_width + 2;
+              vector__size (out_line) = pad;
+              memset (out_line, ' ', pad);
               current_width = 0;
             }
           while (*token)
