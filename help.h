@@ -11,10 +11,12 @@ typedef struct
   unsigned char bottom;
   unsigned char left;
   unsigned char right;
-} help_padding;
+} help_padding_t;
 
-#define HELP_NO_PADDING ((help_padding) {0, 0, 0, 0})
-#define HELP_BORDER(n) ((help_padding) {(n), (n), (n), (n)})
+/* creates a padding object with all values set to 0. */
+#define HELP_NO_PADDING ((help_padding_t) {0, 0, 0, 0})
+/* creates a padding object with all values set to `n`. */
+#define HELP_BORDER(n) ((help_padding_t) {(n), (n), (n), (n)})
 
 typedef struct
 {
@@ -23,7 +25,7 @@ typedef struct
   unsigned desc_width;
   help_text_storage_type text;
   WINDOW *window;
-  help_padding padding;
+  help_padding_t padding;
   char **render_data;
   unsigned cursor;
   unsigned max_cursor;
@@ -36,19 +38,22 @@ help_init_impl (
   unsigned text_size
 );
 
-/* Initialize HELP with TEXT.
-   Note: does not require ncurses to be initialized. */
+/* Initializes the help object.  Can be called before `initscr`. */
 #define help_init(help, text) \
   help_init_impl ((help), (text), sizeof (text) / sizeof ((text)[0]))
 
-/* Release any memory held by the HELP object. */
+/* Releases any memory held by the help object. */
 void
 help_free (
   help_type *help
 );
 
-/* W and H should hold the desired width and height values and will recieve
-   the actual values. W and H include the padding specified in HELP. */
+/* Resizes the ncurses window and wraps text accordingly.  `w` and `h` hold the
+   desired width and height.  If the text gets wrapped the width may be reduced
+   to fit the new text width.  If the width is too narrow for the key column,
+   space and a single word it gets increased.  If the height is greater than the
+   number of lines (after wrapping) it gets decreased.  The actual width and
+   height values get written back to the given pointers. */
 void
 help_resize (
   help_type *help,
@@ -56,15 +61,15 @@ help_resize (
   unsigned *h
 );
 
-/* Center the HELP window inside OUTER. */
+/* Centers the ncurses window inside the given outer window. */
 void
 help_center (
   help_type *help,
   WINDOW *outer
 );
 
-/* Resize and center the HELP window inside OUTER,
-   using PERCENT % of OUTER's size. */
+/* Resizes the ncurses window to a percentage of the outer windows size and
+   centers it inside it.  (see `help_resize` regarding actual size) */
 static inline void
 help_resize_relative (
   help_type *help,
@@ -72,9 +77,9 @@ help_resize_relative (
   float percent
 );
 
-/* Resize and center the HELP window inside OUTER with HORIZONTAL character
-   padding at the top/bottom and VERTICAL characters padding at the
-   left/right. */
+/* Resizes the ncurses window to have the given offsets from the outer windows
+   borders and centers it inside it.  (see `help_resize` regarding actual size)
+ */
 static inline void
 help_resize_offset (
   help_type *help,
@@ -83,29 +88,30 @@ help_resize_offset (
   unsigned horizontal
 );
 
-/* Draw the help text into its window. */
+/* Draws the contents to the ncurses window.  `help_resize` should have been
+   called once before this. */
 void
 help_draw (
   help_type *help
 );
 
-/* Set the cursor. If POS is out of bounds it gets clamped. */
+/* Sets the cursor position.  If it is out of bounds it gets clamped. */
 void
 help_set_cursor (
   help_type *help,
   unsigned pos
 );
 
-/* Move the cursor by BY (negative value moves up, positive down). If the
-   resulting position would be out of bounds it gets clamped. */
+/* Moves the cursor by the given amount.  If resulting position would be out of
+   bounds it gets clamped. */
 void
 help_move_cursor (
   help_type *help,
   int by
 );
 
-/* Print the HELP text into STREAM. No previous call to `help_resize` required.
- */
+/* Prints the help text into the given stream.  Does not require a previous
+   call to `help_resize`, but if present the wrapped text gets printed. */
 void
 help_print (
   help_type *help,
