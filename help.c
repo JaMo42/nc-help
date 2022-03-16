@@ -298,11 +298,20 @@ void
 help_print (help_type *help, FILE *stream)
 {
   unsigned i;
-  for (i = 0; i < help->height; ++i)
+  if (help->render_data)
     {
-      fprintf (stream, "%-*s  %s\n",
-               help->key_width + (int)utf8_padding_offset (help->text[i][0]),
-               help->text[i][0], help->text[i][1]);
+      vector_for_each (help->render_data, line)
+        {
+          fputs (*line, stream);
+          fputc ('\n', stream);
+        }
+    }
+  else
+    {
+      for (i = 0; i < help->height; ++i)
+        fprintf (stream, "%-*s  %s\n",
+                 help->key_width + (int)utf8_padding_offset (help->text[i][0]),
+                 help->text[i][0], help->text[i][1]);
     }
 }
 
