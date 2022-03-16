@@ -154,6 +154,7 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
                   /* Single word was wider than width, adjust window size and
                      restart. */
                   free (line);
+                  vector_free (out_line);
                   return help_render (help,
                                       (help->padding.left + help->padding.right
                                        + help->key_width + 2 + token_width),
