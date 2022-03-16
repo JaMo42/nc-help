@@ -144,13 +144,18 @@ help_free (help_type *help)
 static void
 help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
 {
-  const unsigned content_width = ((window_width
-                                   ? window_width
-                                   : getmaxx (help->window))
+  const unsigned content_width = (window_width
                                   - help->padding.left - help->padding.right);
   const unsigned width = content_width - help->key_width - 2;
   unsigned i, current_width, token_width, pad;
   char *line, *token, *out_line;
+  if (width > window_width)
+    {
+      /* Overflow in width calculation */
+      return help_render (help, (help->key_width * 4 + 6
+                                 + help->padding.left + help->padding.right),
+                          rendered_width);
+    }
   if (help->desc_width <= width)
     {
       /* No formatting needed, draw directly from text */
@@ -161,6 +166,7 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
   line = malloc (help->desc_width * 4);
   if (help->render_data)
     {
+      /* Clear previous render data */
       vector_for_each (help->render_data, line)
         vector_free (*line);
       vector_clear (help->render_data);
@@ -295,7 +301,7 @@ help_resize (help_type *help, unsigned *w, unsigned *h)
   else
     help->window = newwin (*h, *w, 0, 0);
   if (!did_render)
-    help_render (help, 0, NULL);
+    help_render (help, *w, NULL);
   help->max_cursor = (content_height
                       - (*h
                          - ((help->padding.top - help->padding.bottom) << 1)));
