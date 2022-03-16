@@ -75,10 +75,10 @@ help_free (
 
 /* Resizes the ncurses window and wraps text accordingly.  `w` and `h` hold the
    desired width and height.  If the text gets wrapped the width may be reduced
-   to fit the new text width.  If the width is too narrow for the key column,
-   space and a single word it gets increased.  If the height is greater than the
-   number of lines (after wrapping) it gets decreased.  The actual width and
-   height values get written back to the given pointers. */
+   to fit the new text width.  If the width is too narrow for the wrapped
+   content it gets increased.  If the height is greater than the number of lines
+   (after wrapping) it gets decreased.  The actual width and height values get
+   written back to the given pointers. */
 void
 help_resize (
   help_type *help,
