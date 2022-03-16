@@ -1,8 +1,33 @@
-#define _GNU_SOURCE
+/* This is free and unencumbered software released into the public domain.
+
+   Anyone is free to copy, modify, publish, use, compile, sell, or
+   distribute this software, either in source code form or as a compiled
+   binary, for any purpose, commercial or non-commercial, and by any
+   means.
+
+   In jurisdictions that recognize copyright laws, the author or authors
+   of this software dedicate any and all copyright interest in the
+   software to the public domain. We make this dedication for the benefit
+   of the public at large and to the detriment of our heirs and
+   successors. We intend this dedication to be an overt act of
+   relinquishment in perpetuity of all present and future rights to this
+   software under copyright law.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+   IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+   OTHER DEALINGS IN THE SOFTWARE.
+
+   For more information, please refer to <http://unlicense.org/> */
+#define _GNU_SOURCE /* declare wcwidth */
 #include "help.h"
 #include "vector.h"
 #include <wchar.h>
 
+/* Sums the results of `f (codepont)` for each codepoint in the given string. */
 static long
 utf8_sum (const char *in_str, int (*f) (wchar_t))
 {
@@ -38,6 +63,7 @@ utf8_sum (const char *in_str, int (*f) (wchar_t))
   return ret;
 }
 
+
 static int
 padding_offset (wchar_t ch)
 {
@@ -53,8 +79,12 @@ padding_offset (wchar_t ch)
     return 4 - w;
 }
 
+/* Gets display width of utf8 string. */
 #define utf8_width(s) utf8_sum ((s), wcwidth)
+
+/* Gets required padding offset to properly pad a utf8 string. */
 #define utf8_padding_offset(s) utf8_sum ((s), padding_offset)
+
 
 void
 help_init_impl (help_type *help, help_text_type text, unsigned text_size)
@@ -89,6 +119,7 @@ help_init_impl (help_type *help, help_text_type text, unsigned text_size)
   help->max_cursor = 0;
 }
 
+
 static inline void
 help_free_render_data (help_type *help)
 {
@@ -97,6 +128,7 @@ help_free_render_data (help_type *help)
   vector_free (help->render_data);
   help->render_data = NULL;
 }
+
 
 void
 help_free (help_type *help)
@@ -107,6 +139,8 @@ help_free (help_type *help)
     delwin (help->window);
 }
 
+
+/* Wraps the help text, if neccessary. */
 static void
 help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
 {
@@ -198,6 +232,7 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
   free (line);
 }
 
+
 void
 help_draw (help_type *help)
 {
@@ -222,6 +257,7 @@ help_draw (help_type *help)
         }
     }
 }
+
 
 void
 help_resize (help_type *help, unsigned *w, unsigned *h)
@@ -266,6 +302,7 @@ help_resize (help_type *help, unsigned *w, unsigned *h)
   help->cursor = 0;
 }
 
+
 void
 help_center (help_type *help, WINDOW *outer)
 {
@@ -273,6 +310,7 @@ help_center (help_type *help, WINDOW *outer)
          (getmaxy (outer) - getmaxy (help->window)) / 2,
          (getmaxx (outer) - getmaxx (help->window)) / 2);
 }
+
 
 void
 help_set_cursor (help_type *help, unsigned pos)
@@ -282,6 +320,7 @@ help_set_cursor (help_type *help, unsigned pos)
   else
     help->cursor = pos;
 }
+
 
 void
 help_move_cursor (help_type *help, int by)
@@ -293,6 +332,7 @@ help_move_cursor (help_type *help, int by)
   else
     help->cursor += by;
 }
+
 
 void
 help_print (help_type *help, FILE *stream)
