@@ -48,6 +48,7 @@ typedef struct
   unsigned height;
   unsigned key_width;
   unsigned desc_width;
+  unsigned desc_min_width;
   help_text_storage_type text;
   WINDOW *window;
   help_padding_t padding;

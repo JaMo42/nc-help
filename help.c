@@ -22,19 +22,20 @@
    OTHER DEALINGS IN THE SOFTWARE.
 
    For more information, please refer to <http://unlicense.org/> */
-#define _GNU_SOURCE /* declare wcwidth */
+#define _GNU_SOURCE
 #include "help.h"
 #include "vector.h"
 #include <wchar.h>
 
 /* Sums the results of `f (codepont)` for each codepoint in the given string. */
 static long
-utf8_sum (const char *in_str, int (*f) (wchar_t))
+utf8_sum (const char *begin_, const char *end_, int (*f) (wchar_t))
 {
-  const unsigned char *str = (const unsigned char *)in_str;
+  const unsigned char *str = (const unsigned char *)begin_;
+  const unsigned char *const end = (const unsigned char *)end_;
   long ret = 0;
   uint32_t ch;
-  while (*str)
+  while (*str && (str != end))
     {
       if (*str < 0x80)
         ch = *str++;
@@ -80,10 +81,36 @@ padding_offset (wchar_t ch)
 }
 
 /* Gets display width of utf8 string. */
-#define utf8_width(s) utf8_sum ((s), wcwidth)
+#define utf8_width(s) utf8_sum ((s), (const char *)-1, wcwidth)
+#define utf8_width_range(s, e) utf8_sum ((s), (e), wcwidth)
 
 /* Gets required padding offset to properly pad a utf8 string. */
-#define utf8_padding_offset(s) utf8_sum ((s), padding_offset)
+#define utf8_padding_offset(s) utf8_sum ((s), (const char *)-1, padding_offset)
+
+
+/* Gets the width of the longest word in the description. */
+static unsigned
+longest_word_width (help_text_storage_type text, unsigned count)
+{
+  unsigned i, l, longest = 0;
+  const char *p, *pp;
+  for (i = 0; i < count; ++i)
+    {
+      p = text[i][1];
+      pp = p;
+      while (*p)
+        {
+          p = strchrnul (pp, ' ');
+          l = utf8_width_range (pp, p);
+          if (l > longest)
+            longest = l;
+          pp = p;
+          while (*pp == ' ')
+            ++pp;
+        }
+    }
+  return longest;
+}
 
 
 void
@@ -112,6 +139,7 @@ help_init_impl (help_type *help, help_text_type text, unsigned text_size)
             help->desc_width = w;
         }
     }
+  help->desc_min_width = longest_word_width (text, text_size);
   help->window = NULL;
   help->padding = HELP_BORDER (1);
   help->render_data = NULL;
@@ -149,10 +177,10 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
   const unsigned width = content_width - help->key_width - 2;
   unsigned i, current_width, token_width, pad;
   char *line, *token, *out_line;
-  if (width > window_width)
+  if (width > window_width || width < help->desc_min_width)
     {
-      /* Overflow in width calculation */
-      return help_render (help, (help->key_width * 4 + 6
+      /* Overflow in width calculation or width less than minimum */
+      return help_render (help, (help->key_width + help->desc_min_width + 2
                                  + help->padding.left + help->padding.right),
                           rendered_width);
     }
@@ -189,17 +217,6 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
           token_width = utf8_width (token);
           if (current_width + token_width > width)
             {
-              if (current_width == 0)
-                {
-                  /* Single word was wider than width, adjust window size and
-                     restart. */
-                  free (line);
-                  vector_free (out_line);
-                  return help_render (help,
-                                      (help->padding.left + help->padding.right
-                                       + help->key_width + 2 + token_width),
-                                      rendered_width);
-                }
               /* Line limit reached */
               vector_back (out_line) = '\0';
               vector_push (help->render_data, out_line);
@@ -216,6 +233,7 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
               memset (out_line, ' ', pad);
               current_width = 0;
             }
+          /* Add word */
           while (*token)
             vector_push (out_line, *token++);
           vector_push (out_line, ' ');
