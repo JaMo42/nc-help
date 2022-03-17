@@ -66,7 +66,7 @@ static help_text_type help_text = {
 };
 
 #define TEST_HELP_PRINT 0
-#define TEST_SMALL_WINDOW 1
+#define TEST_SMALL_WINDOW 0
 
 #if TEST_SMALL_WINDOW
 #  define DO_RESIZE() \
@@ -86,6 +86,22 @@ main ()
 #if TEST_HELP_PRINT
   unsigned w_ = 30, h_ = 10;
   help_resize (&help, &w_, &h_);
+#if 1
+  w_ = 3;
+  help_resize (&help, &w_, &h_);
+  w_ = 10;
+  help_resize (&help, &w_, &h_);
+  h_ = 5;
+  help_resize (&help, &w_, &h_);
+  w_ = 40;
+  h_ = 20;
+  help_resize (&help, &w_, &h_);
+  w_ = 70;
+  help_resize (&help, &w_, &h_);
+  w_ = 30;
+  h_ = 10;
+  help_resize (&help, &w_, &h_);
+#endif
   help_print (&help, stdout);
   help_free (&help);
   return 0;

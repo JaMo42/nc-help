@@ -55,6 +55,7 @@ typedef struct
   char **render_data;
   unsigned cursor;
   unsigned max_cursor;
+  bool use_render_data;
 } help_type;
 
 void

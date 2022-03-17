@@ -145,16 +145,7 @@ help_init_impl (help_type *help, help_text_type text, unsigned text_size)
   help->render_data = NULL;
   help->cursor = 0;
   help->max_cursor = 0;
-}
-
-
-static inline void
-help_free_render_data (help_type *help)
-{
-  vector_for_each (help->render_data, line)
-    vector_free (*line);
-  vector_free (help->render_data);
-  help->render_data = NULL;
+  help->use_render_data = FALSE;
 }
 
 
@@ -162,11 +153,37 @@ void
 help_free (help_type *help)
 {
   if (help->render_data)
-    help_free_render_data (help);
+    {
+      vector_for_each (help->render_data, line)
+        vector_free (*line);
+      vector_free (help->render_data);
+    }
   if (help->window)
     delwin (help->window);
 }
 
+
+/* Get the next line from previous render data or create a new one. */
+#define NEW_LINE() \
+  do { \
+    if (render_data_it == render_data_end) \
+      out_line = vector_create (char, content_width * 4); \
+    else \
+      { \
+        out_line = *render_data_it; \
+        vector_clear (out_line); \
+      } \
+  } while (0)
+
+/* Add line to render data if it is new or advance iterator over old
+   render data. */
+#define ADD_LINE() \
+  do { \
+    if (render_data_it == render_data_end) \
+      vector_push (help->render_data, out_line); \
+    else \
+      ++render_data_it; \
+  } while (0)
 
 /* Wraps the help text, if neccessary. */
 static void
@@ -177,6 +194,8 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
   const unsigned width = content_width - help->key_width - 2;
   unsigned i, current_width, token_width, pad;
   char *line, *token, *out_line;
+  char **render_data_it = help->render_data;
+  char **render_data_end = vector_end (help->render_data);
   if (width > window_width || width < help->desc_min_width)
     {
       /* Overflow in width calculation or width less than minimum */
@@ -187,25 +206,17 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
   if (help->desc_width <= width)
     {
       /* No formatting needed, draw directly from text */
-      if (help->render_data)
-        help_free_render_data (help);
+      help->use_render_data = FALSE;
       return;
     }
   line = malloc (help->desc_width * 4);
-  if (help->render_data)
-    {
-      /* Clear previous render data */
-      vector_for_each (help->render_data, line)
-        vector_free (*line);
-      vector_clear (help->render_data);
-    }
   if (rendered_width)
     *rendered_width = 0;
   for (i = 0; i < help->height; ++i)
     {
       memcpy (line, help->text[i][1], strlen (help->text[i][1]) + 1);
       token = strtok (line, " ");
-      out_line = vector_create (char, content_width);
+      NEW_LINE ();
       /* Key and padding */
       pad = help->key_width + 2 + utf8_padding_offset (help->text[i][0]);
       vector__size (out_line) = pad;
@@ -219,14 +230,14 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
             {
               /* Line limit reached */
               vector_back (out_line) = '\0';
-              vector_push (help->render_data, out_line);
+              ADD_LINE ();
               if (rendered_width)
-              {
-                --current_width ;
-                if (current_width > *rendered_width)
-                  *rendered_width = current_width;
-              }
-              out_line = vector_create (char, content_width);
+                {
+                  --current_width;
+                  if (current_width > *rendered_width)
+                    *rendered_width = current_width;
+                }
+              NEW_LINE ();
               /* Padding */
               pad = help->key_width + 2;
               vector__size (out_line) = pad;
@@ -242,7 +253,7 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
         }
       /* Add line */
       vector_back (out_line) = '\0';
-      vector_push (help->render_data, out_line);
+      ADD_LINE ();
       if (rendered_width)
         {
           current_width -= !!current_width;
@@ -254,7 +265,11 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
   if (rendered_width)
     *rendered_width += help->key_width + 2;
   free (line);
+  help->use_render_data = TRUE;
 }
+
+#undef NEW_LINE
+#undef ADD_LINE
 
 
 void
@@ -265,7 +280,7 @@ help_draw (help_type *help)
   const unsigned end = help->cursor + content_height;
   unsigned i, line;
   wclear (help->window);
-  if (help->render_data)
+  if (help->use_render_data)
     {
       for (line = 1, i = help->cursor; i != end; ++i, ++line)
         mvwaddstr (help->window, line, 1, help->render_data[i]);
@@ -294,8 +309,7 @@ help_resize (help_type *help, unsigned *w, unsigned *h)
   if (*w > content_width)
     {
       *w = content_width;
-      if (help->render_data)
-        help_free_render_data (help);
+      help->use_render_data = FALSE;
     }
   else if (content_width > *w)
     {
@@ -309,7 +323,7 @@ help_resize (help_type *help, unsigned *w, unsigned *h)
     }
   /* Height */
   content_height = ((
-    help->render_data ? vector_size (help->render_data) : help->height
+    help->use_render_data ? vector_size (help->render_data) : help->height
   ) + help->padding.top + help->padding.bottom);
   if (*h > content_height)
     *h = content_height;
@@ -362,7 +376,7 @@ void
 help_print (help_type *help, FILE *stream)
 {
   unsigned i;
-  if (help->render_data)
+  if (help->use_render_data)
     {
       vector_for_each (help->render_data, line)
         {
