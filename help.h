@@ -129,6 +129,12 @@ help_draw (
   help_type *help
 );
 
+/* Refreshes the ncurses window. */
+static inline void
+help_refresh (
+  help_type *help
+);
+
 /* Sets the cursor position.  If it is out of bounds it gets clamped. */
 void
 help_set_cursor (
@@ -173,6 +179,12 @@ help_resize_offset (help_type *help, WINDOW *outer, unsigned vertical,
   unsigned h = getmaxy (outer) - (horizontal << 1);
   help_resize (help, &w, &h);
   help_center (help, outer);
+}
+
+static inline void
+help_refresh (help_type *help)
+{
+  wrefresh (help->window);
 }
 
 #endif /* HELP_H */

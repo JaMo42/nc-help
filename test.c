@@ -119,7 +119,7 @@ main ()
   help_draw (&help);
   box (help.window, 0, 0);
   refresh ();
-  wrefresh (help.window);
+  help_refresh (&help);
 
   int ch;
   bool running = TRUE;
@@ -158,7 +158,7 @@ main ()
       help_draw (&help);
       box (help.window, 0, 0);
       refresh ();
-      wrefresh (help.window);
+      help_refresh (&help);
     }
 
   help_free (&help);
