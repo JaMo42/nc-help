@@ -374,12 +374,12 @@ help_move_cursor (help_type *help, int by)
 
 
 void
-help_print (help_type *help, FILE *stream)
+help_print (const help_type *help, FILE *stream)
 {
   unsigned i;
   if (help->use_render_data)
     {
-      vector_for_each (help->render_data, line)
+      vector_for_each ((char **)help->render_data, line)
         {
           fputs (*line, stream);
           fputc ('\n', stream);

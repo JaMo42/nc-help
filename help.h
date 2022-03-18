@@ -138,6 +138,12 @@ help_refresh (
   help_type *help
 );
 
+/* Checks whether help text can be scrolled. */
+static inline bool
+help_can_scroll (
+  const help_type *help
+);
+
 /* Sets the cursor position.  If it is out of bounds it gets clamped. */
 void
 help_set_cursor (
@@ -157,7 +163,7 @@ help_move_cursor (
    call to `help_resize`, but if present the wrapped text gets printed. */
 void
 help_print (
-  help_type *help,
+  const help_type *help,
   FILE *stream
 );
 
@@ -188,6 +194,12 @@ static inline void
 help_refresh (help_type *help)
 {
   wrefresh (help->window);
+}
+
+static inline bool
+help_can_scroll (const help_type *help)
+{
+  return help->max_cursor > 0;
 }
 
 #ifdef __cplusplus
@@ -251,6 +263,10 @@ public:
   refresh ()
   { help_refresh (&self_); }
 
+  inline bool
+  can_scroll () const
+  { return help_can_scroll (&self_); }
+
   inline void
   set_cursor (unsigned pos)
   { help_set_cursor (&self_, pos); }
@@ -260,7 +276,7 @@ public:
   { help_move_cursor (&self_, by); }
 
   inline void
-  print (FILE *stream = stdout)
+  print (FILE *stream = stdout) const
   { help_print (&self_, stream); }
 
 private:
