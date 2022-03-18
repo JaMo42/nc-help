@@ -26,6 +26,9 @@
 #define HELP_H
 #include <ncurses.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 struct help_key_desc
 {
@@ -186,5 +189,84 @@ help_refresh (help_type *help)
 {
   wrefresh (help->window);
 }
+
+#ifdef __cplusplus
+}
+#endif
+
+
+
+/**** C++ wrapper ****/
+
+#ifdef __cplusplus
+#include <cstddef>
+namespace nc_help
+{
+class Help
+{
+public:
+  template <std::size_t N>
+    Help (struct help_key_desc (&text)[N])
+    { help_init_impl (&self_, text, N); }
+
+  ~Help ()
+  { help_free (&self_); }
+
+  inline WINDOW *
+  window ()
+  { return self_.window; }
+
+  inline help_padding_t &
+  padding ()
+  { return self_.padding; }
+
+  inline void
+  resize (unsigned &w, unsigned &h)
+  { help_resize (&self_, &w, &h); }
+
+  inline void
+  resize (unsigned &&w, unsigned &&h)
+  {
+    unsigned my_w = w, my_h = h;
+    this->resize (my_w, my_h);
+  }
+
+  inline void
+  center (WINDOW *outer = stdscr)
+  { help_center (&self_, outer); }
+
+  inline void
+  resize_relative (float percent, WINDOW *outer = stdscr)
+  { help_resize_relative (&self_, outer, percent); }
+
+  inline void
+  resize_offset (unsigned v, unsigned h, WINDOW *outer = stdscr)
+  { help_resize_offset (&self_, outer, v, h); }
+
+  inline void
+  draw ()
+  { help_draw (&self_); }
+
+  inline void
+  refresh ()
+  { help_refresh (&self_); }
+
+  inline void
+  set_cursor (unsigned pos)
+  { help_set_cursor (&self_, pos); }
+
+  inline void
+  move_cursor (int by)
+  { help_move_cursor (&self_, by); }
+
+  inline void
+  print (FILE *stream = stdout)
+  { help_print (&self_, stream); }
+
+private:
+  help_type self_ = {};
+};
+}
+#endif
 
 #endif /* HELP_H */

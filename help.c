@@ -80,6 +80,7 @@ padding_offset (wchar_t ch)
     return 4 - w;
 }
 
+
 /* Gets display width of utf8 string. */
 #define utf8_width(s) utf8_sum ((s), (const char *)-1, wcwidth)
 #define utf8_width_range(s, e) utf8_sum ((s), (e), wcwidth)
@@ -209,7 +210,7 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
       help->use_render_data = FALSE;
       return;
     }
-  line = malloc (help->desc_width * 4);
+  line = (char *)malloc (help->desc_width * 4);
   if (rendered_width)
     *rendered_width = 0;
   for (i = 0; i < help->height; ++i)
