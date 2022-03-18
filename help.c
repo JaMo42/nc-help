@@ -96,7 +96,7 @@ longest_word_width (help_text_storage_type text, unsigned count)
   const char *p, *pp;
   for (i = 0; i < count; ++i)
     {
-      p = text[i][1];
+      p = text[i].desc;
       pp = p;
       while (*p)
         {
@@ -124,8 +124,8 @@ help_init_impl (help_type *help, help_text_type text, unsigned text_size)
   help->desc_width = 0;
   for (i = 0; i < text_size; ++i)
     {
-      key = text[i][0];
-      desc = text[i][1];
+      key = text[i].key;
+      desc = text[i].desc;
       if (*key)
         {
           w = utf8_width (key);
@@ -214,13 +214,13 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
     *rendered_width = 0;
   for (i = 0; i < help->height; ++i)
     {
-      memcpy (line, help->text[i][1], strlen (help->text[i][1]) + 1);
+      memcpy (line, help->text[i].desc, strlen (help->text[i].desc) + 1);
       token = strtok (line, " ");
       NEW_LINE ();
       /* Key and padding */
-      pad = help->key_width + 2 + utf8_padding_offset (help->text[i][0]);
+      pad = help->key_width + 2 + utf8_padding_offset (help->text[i].key);
       vector__size (out_line) = pad;
-      sprintf (out_line, "%-*s", pad, help->text[i][0]);
+      sprintf (out_line, "%-*s", pad, help->text[i].key);
       /* Description */
       current_width = 0;
       while (token)
@@ -289,10 +289,10 @@ help_draw (help_type *help)
     {
       for (line = 1, i = help->cursor; i != end; ++i, ++line)
         {
-          mvwaddstr (help->window, line, help->padding.left, help->text[i][0]);
+          mvwaddstr (help->window, line, help->padding.left, help->text[i].key);
           mvwaddstr (help->window,
                      line, help->padding.left + help->key_width + 2,
-                     help->text[i][1]);
+                     help->text[i].desc);
         }
     }
 }
@@ -388,8 +388,8 @@ help_print (help_type *help, FILE *stream)
     {
       for (i = 0; i < help->height; ++i)
         fprintf (stream, "%-*s  %s\n",
-                 help->key_width + (int)utf8_padding_offset (help->text[i][0]),
-                 help->text[i][0], help->text[i][1]);
+                 help->key_width + (int)utf8_padding_offset (help->text[i].key),
+                 help->text[i].key, help->text[i].desc);
     }
 }
 

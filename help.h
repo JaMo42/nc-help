@@ -26,8 +26,15 @@
 #define HELP_H
 #include <ncurses.h>
 
-typedef const char *help_text_type[][2];
-typedef const char *const (*help_text_storage_type)[2];
+
+struct help_key_desc
+{
+  const char *key;
+  const char *desc;
+};
+
+typedef struct help_key_desc help_text_type[];
+typedef struct help_key_desc *help_text_storage_type;
 
 typedef struct
 {
