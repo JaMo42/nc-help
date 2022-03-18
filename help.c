@@ -22,7 +22,9 @@
    OTHER DEALINGS IN THE SOFTWARE.
 
    For more information, please refer to <http://unlicense.org/> */
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include "help.h"
 #include "vector.h"
 #include <wchar.h>
@@ -142,7 +144,11 @@ help_init_impl (help_type *help, help_text_type text, unsigned text_size)
     }
   help->desc_min_width = longest_word_width (text, text_size);
   help->window = NULL;
+#ifdef __cplusplus
+  help->padding = {1, 1, 1, 1};
+#else
   help->padding = HELP_BORDER (1);
+#endif
   help->render_data = NULL;
   help->cursor = 0;
   help->max_cursor = 0;
