@@ -121,6 +121,11 @@ help_init_impl (help_type *help, help_text_type text, unsigned text_size)
 {
   const char *key, *desc;
   unsigned i, w;
+  if (wcwidth (L'가') == -1)
+    {
+      fputs ("LC_CTYPE not set\n", stderr);
+      exit (1);
+    }
   help->text = text;
   help->height = text_size;
   help->key_width = 0;
