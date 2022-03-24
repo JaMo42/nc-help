@@ -29,24 +29,22 @@
 #include "vector.h"
 #include <wchar.h>
 
-/* Sums the results of `f (codepont)` for each codepoint in the given string. */
+/* Sums the results of `f (c)` for each codepoint `c` in the given string. */
 static long
-utf8_sum (const char *begin_, const char *end_, int (*f) (wchar_t))
+utf8_sum (const char *str, const char *end, int (*f) (wchar_t))
 {
-  const unsigned char *str = (const unsigned char *)begin_;
-  const unsigned char *const end = (const unsigned char *)end_;
   long ret = 0;
   uint32_t ch;
   while (*str && (str != end))
     {
-      if (*str < 0x80)
+      if ((unsigned char)*str < 0x80)
         ch = *str++;
-      else if (*str < 0xe0)
+      else if ((unsigned char)*str < 0xe0)
         {
           ch = ((str[0] & 0x1f) << 6) | (str[1] & 0x3f);
           str += 2;
         }
-      else if (*str < 0xf0)
+      else if ((unsigned char)*str < 0xf0)
         {
           ch = (((str[0] & 0xf) << 12)
                 | ((str[1] & 0x3f) << 6)
@@ -84,11 +82,11 @@ padding_offset (wchar_t ch)
 
 
 /* Gets display width of utf8 string. */
-#define utf8_width(s) utf8_sum ((s), (const char *)-1, wcwidth)
+#define utf8_width(s) utf8_sum ((s), NULL, wcwidth)
 #define utf8_width_range(s, e) utf8_sum ((s), (e), wcwidth)
 
 /* Gets required padding offset to properly pad a utf8 string. */
-#define utf8_padding_offset(s) utf8_sum ((s), (const char *)-1, padding_offset)
+#define utf8_padding_offset(s) utf8_sum ((s), NULL, padding_offset)
 
 
 /* Gets the width of the longest word in the description. */

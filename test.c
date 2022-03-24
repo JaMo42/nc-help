@@ -66,7 +66,7 @@ static help_text_type help_text = {
 };
 
 #define TEST_HELP_PRINT 0
-#define TEST_SMALL_WINDOW 0
+#define TEST_SMALL_WINDOW 1
 
 #if TEST_SMALL_WINDOW
 #  define DO_RESIZE() \
