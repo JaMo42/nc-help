@@ -37,6 +37,10 @@ The display/input loop has to be done by the user.
 
 See the `test.c` and `test.cc` files for C/C++ implementation examples.
 
+## Requirements
+
+- `vector.h` from https://github.com/JaMo42/c-vector
+
 ## License
 
 nc-help is free and unencumbered public domain software. For more information, see http://unlicense.org/.
