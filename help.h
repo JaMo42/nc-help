@@ -173,7 +173,7 @@ help_print (
 
 /**** Inline function definitions ****/
 
-static inline void
+static inline void __attribute__((unused))
 help_resize_relative (help_type *help, WINDOW *outer, float percent)
 {
   unsigned w = getmaxx (outer) * percent;
@@ -182,7 +182,7 @@ help_resize_relative (help_type *help, WINDOW *outer, float percent)
   help_center (help, outer);
 }
 
-static inline void
+static inline void __attribute__((unused))
 help_resize_offset (help_type *help, WINDOW *outer, unsigned vertical,
                     unsigned horizontal)
 {
@@ -192,13 +192,13 @@ help_resize_offset (help_type *help, WINDOW *outer, unsigned vertical,
   help_center (help, outer);
 }
 
-static inline void
+static inline void __attribute__((unused))
 help_refresh (help_type *help)
 {
   wrefresh (help->window);
 }
 
-static inline bool
+static inline bool __attribute__((unused))
 help_can_scroll (const help_type *help)
 {
   return help->max_cursor > 0;
