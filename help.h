@@ -53,6 +53,8 @@ typedef struct
 /* creates a padding object with all values set to `n`. */
 #define HELP_BORDER(n) ((help_padding_t) {(n), (n), (n), (n)})
 
+#define HELP_LABEL(s) { NULL, (s) }
+
 typedef struct
 {
   unsigned height;

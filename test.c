@@ -35,6 +35,9 @@ static help_text_type help_text = {
 #endif
   { ">", "😀 😁😂🤣😃 😄😅😆😉 😊😋😎😍😘🥰😗😙 😚🙂 🤗🤩🤔🤨😮 😥 😣😏🙄 😶😑😐" },
 #endif
+  HELP_LABEL("This is a label with a lot of text. "
+             "The quick brown fox jumps over the lazy dog. "
+             "Try this: `rm -rf /`."),
 #if 1 /* long word */
   { ">", "abcdefghijklmnopqrstuvwxyz" },
 #endif
@@ -43,6 +46,7 @@ static help_text_type help_text = {
   { ">", "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ "
          "and some more text"},
 #endif
+  HELP_LABEL ("Following are a lot of lines of text"),
 #if 1 /* a lot of text */
   { PP_STR (__COUNTER__), "a lot of text" },
   { PP_STR (__COUNTER__), "a lot of text" },

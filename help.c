@@ -132,6 +132,8 @@ help_init_impl (help_type *help, help_text_type text, unsigned text_size)
     {
       key = text[i].key;
       desc = text[i].desc;
+      if (!key)
+        continue;
       if (*key)
         {
           w = utf8_width (key);
@@ -201,19 +203,19 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
 {
   const unsigned content_width = (window_width
                                   - help->padding.left - help->padding.right);
-  const unsigned width = content_width - help->key_width - 2;
-  unsigned i, current_width, token_width, pad;
+  const unsigned desc_width = content_width - help->key_width - 2;
+  unsigned i, current_width, token_width, pad, width;
   char *line, *token, *out_line;
   char **render_data_it = help->render_data;
   char **render_data_end = vector_end (help->render_data);
-  if (width > window_width || width < help->desc_min_width)
+  if (desc_width > window_width || desc_width < help->desc_min_width)
     {
       /* Overflow in width calculation or width less than minimum */
       return help_render (help, (help->key_width + help->desc_min_width + 2
                                  + help->padding.left + help->padding.right),
                           rendered_width);
     }
-  if (help->desc_width <= width)
+  if (help->desc_width <= desc_width)
     {
       /* No formatting needed, draw directly from text */
       help->use_render_data = FALSE;
@@ -226,11 +228,15 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
     {
       memcpy (line, help->text[i].desc, strlen (help->text[i].desc) + 1);
       token = strtok (line, " ");
+      width = help->text[i].key ? desc_width : content_width;
       NEW_LINE ();
       /* Key and padding */
-      pad = help->key_width + 2 + utf8_padding_offset (help->text[i].key);
-      vector__size (out_line) = pad;
-      sprintf (out_line, "%-*s", pad, help->text[i].key);
+      if (help->text[i].key)
+        {
+          pad = help->key_width + 2 + utf8_padding_offset (help->text[i].key);
+          vector__size (out_line) = pad;
+          sprintf (out_line, "%-*s", pad, help->text[i].key);
+        }
       /* Description */
       current_width = 0;
       while (token)
@@ -249,9 +255,12 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
                 }
               NEW_LINE ();
               /* Padding */
-              pad = help->key_width + 2;
-              vector__size (out_line) = pad;
-              memset (out_line, ' ', pad);
+              if (help->text[i].key)
+                {
+                  pad = help->key_width + 2;
+                  vector__size (out_line) = pad;
+                  memset (out_line, ' ', pad);
+                }
               current_width = 0;
             }
           /* Add word */
