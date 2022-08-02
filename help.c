@@ -308,10 +308,17 @@ help_draw (help_type *help)
     {
       for (line = 1, i = help->cursor; i != end; ++i, ++line)
         {
-          mvwaddstr (help->window, line, help->padding.left, help->text[i].key);
-          mvwaddstr (help->window,
-                     line, help->padding.left + help->key_width + 2,
-                     help->text[i].desc);
+          if (help->text[i].key)
+            {
+              mvwaddstr (help->window, line, help->padding.left,
+                         help->text[i].key);
+              mvwaddstr (help->window,
+                         line, help->padding.left + help->key_width + 2,
+                         help->text[i].desc);
+            }
+          else
+            mvwaddstr (help->window, line, help->padding.left,
+                       help->text[i].desc);
         }
     }
 }
