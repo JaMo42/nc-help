@@ -237,6 +237,11 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
           vector__size (out_line) = pad;
           sprintf (out_line, "%-*s", pad, help->text[i].key);
         }
+      else
+        {
+          memcpy (out_line, "%%LABEL", 7);
+          vector__size (out_line) = 7;
+        }
       /* Description */
       current_width = 0;
       while (token)
@@ -260,6 +265,11 @@ help_render (help_type *help, unsigned window_width, unsigned *rendered_width)
                   pad = help->key_width + 2;
                   vector__size (out_line) = pad;
                   memset (out_line, ' ', pad);
+                }
+              else
+                {
+                  memcpy (out_line, "%%LABEL", 7);
+                  vector__size (out_line) = 7;
                 }
               current_width = 0;
             }
@@ -298,11 +308,19 @@ help_draw (help_type *help)
                                    - help->padding.bottom);
   const unsigned end = help->cursor + content_height;
   unsigned i, line;
+  bool label;
   wclear (help->window);
   if (help->use_render_data)
     {
       for (line = 1, i = help->cursor; i != end; ++i, ++line)
-        mvwaddstr (help->window, line, 1, help->render_data[i]);
+        {
+          label = strncmp (help->render_data[i], "%%LABEL", 7) == 0;
+          if (label)
+            wattron (help->window, A_BOLD);
+          mvwaddstr (help->window, line, 1, help->render_data[i] + (7*label));
+          if (label)
+            wattroff (help->window, A_BOLD);
+        }
     }
   else
     {
@@ -317,8 +335,12 @@ help_draw (help_type *help)
                          help->text[i].desc);
             }
           else
-            mvwaddstr (help->window, line, help->padding.left,
-                       help->text[i].desc);
+            {
+              wattron (help->window, A_BOLD);
+              mvwaddstr (help->window, line, help->padding.left,
+                         help->text[i].desc);
+              wattroff (help->window, A_BOLD);
+            }
         }
     }
 }

@@ -118,6 +118,8 @@ main ()
   nodelay (stdscr, FALSE);
 
   unsigned w = 30, h = 10;
+  (void)w, (void)h;
+
   DO_RESIZE ();
 
   help_draw (&help);
